@@ -13,3 +13,6 @@ class TelegramUser(models.Model):
 
     def __str__(self):
         return self.username if self.username is not None else str(self.user_id)
+
+    def get_total_credits(self):
+        return sum([creditor.total_debt() for creditor in self.creditor_set.all()])

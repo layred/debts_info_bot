@@ -152,4 +152,40 @@ class Bot(BaseBot):
         """
             Отправляет привественное сообщение
         """
-        return self.send(message.chat.id, txts.welcome_text, self.markups.welcome())
+        return self.send(message.chat.id, txts.welcome_text, self.markups._remove())
+
+    def toFixed(self, numObj, digits=2):
+        obj_str = f'{numObj:.{digits}f}'
+        if len(str(round(numObj))) == 8:
+            return obj_str[1:2] + ' ' + obj_str[2:5] + ' ' + obj_str[5:]
+        if len(str(round(numObj))) == 7:
+            return obj_str[:1] + ' ' + obj_str[1:4] + ' ' + obj_str[4:]
+        elif len(str(round(numObj))) == 6:
+            return obj_str[:3] + ' ' + obj_str[3:]
+        elif len(str(round(numObj))) == 5:
+            return obj_str[:2] + ' ' + obj_str[2:]
+        elif len(str(round(numObj))) == 4:
+            return obj_str[:1] + ' ' + obj_str[1:]
+        else:
+            return obj_str
+
+    def send_debt_notification(self, user: TelegramUser) -> Message:
+        """
+            Сообщение об задолжностях
+        """
+        chat_id = user.user_id
+        message_text = '<b>Задолжности %s</b>\n\n' % user.username
+
+        for i, creditor in enumerate(user.creditor_set.all()):
+            message_text += '<i>%i. %s</i>\n' % (i+1, creditor.name)
+            for credit in creditor.credit_set.all():
+                percents = float(credit.get_percents())
+                if percents == 0.00:
+                    message_text += f'   <code>{credit.comment}</code> {self.toFixed(credit.amount)} ₽\n'
+                else:
+                    message_text += f'   <code>{credit.comment}:</code> <i>{self.toFixed(credit.amount)}+{self.toFixed(float(credit.get_percents()))}</i> = <b>{self.toFixed(float(credit.total_amount))}</b> ₽\n'
+            message_text += '   <i>Всего: %s ₽</i>\n\n' % self.toFixed(float(creditor.total_debt()))
+
+        message_text += '<i>Общая задолжность </i> <b>%s ₽</b>\n\n' % self.toFixed(user.get_total_credits())
+
+        return self.send(chat_id, message_text)

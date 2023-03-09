@@ -4,4 +4,4 @@ from django.contrib import admin
 
 @admin.register(TelegramUser)
 class TelegramUserAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('user_id', 'username', 'get_total_credits', )
