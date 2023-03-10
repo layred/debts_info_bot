@@ -39,7 +39,8 @@ venv.bak/
 *.pyc
 __pycache__
 db.sqlite3
-media
+src/media/*
+src/static/*
 
 # Python
 *.py[cod]
