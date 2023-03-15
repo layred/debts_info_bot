@@ -50,11 +50,6 @@ def start(message):
         bot.send_welcome_message(message)
 
 
-@bot.callback_query_handler(func=lambda call: True)
-def handle_callback(call):
-    pass
-
-
-@bot.message_handler(content_types=['text'])
-def message_handler(message):
-    pass
+@bot.message_handler(commands=['debts'])
+def debts(message):
+    bot.send_debt_notification(bot.get_user_id(message.from_user.id))
